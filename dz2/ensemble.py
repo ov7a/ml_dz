@@ -8,7 +8,7 @@ from common import *
 
 classifiers_dict = dict(zip(names, classifiers))
 with open(sys.argv[2]) as f:
-	lines = filter(None, map(lambda l: l.strip('\n'), f.read().split("\n")))
+	lines = filter(lambda l: len(l) and not l.startswith("#"), map(lambda l: l.strip('\n'), f.read().split("\n")))
 	ensemble_classifiers = [(param1, param2, float(threshold), classifiers_dict[name]) for param1, param2, threshold, name in map(lambda l: l.split(' ', 3), lines)]	
 
 X_train_all, X_test_all, y_train, y_test = train_test_split(ds, y, test_size=.4)

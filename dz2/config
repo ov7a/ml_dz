@@ -1,0 +1,9 @@
+X13 X17 0.67 Nearest Neighbors
+X17 X18 0.36 Random Forest
+X10 X17 0.34 Random Forest
+X14 X15 0.37 Random Forest
+X13 X15 0.35 Random Forest
+X9 X15 0.34 Random Forest
+#X15 X18 0.50 AdaBoost
+X10 X15 0.33 Decision Tree
+X15 X17 0.33 Nearest Neighbors
