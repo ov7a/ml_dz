@@ -38,8 +38,8 @@ names = ["Nearest Neighbors", "Linear SVM", "RBF SVM", "Decision Tree",
 		 "Quadratic Discriminant Analysis"]
 classifiers = [
 	KNeighborsClassifier(3),
-	SVC(kernel="linear", C=0.025),
-	SVC(gamma=2, C=1),
+	SVC(kernel="linear", C=0.025, probability = True),
+	SVC(gamma=2, C=1, probability = True),
 	DecisionTreeClassifier(max_depth=5),
 	RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
 	AdaBoostClassifier(),
@@ -47,6 +47,8 @@ classifiers = [
 	LinearDiscriminantAnalysis(),
 	QuadraticDiscriminantAnalysis()
 ]
+
+to_binary = np.vectorize(lambda x: 1.0 if x>=0.5 else 0.0)
 
 ds = pandas.read_csv(sys.argv[1], ';').query("CLASS != 'U'")
 with open(sys.argv[2], "w") as fout:
@@ -58,15 +60,17 @@ with open(sys.argv[2], "w") as fout:
 
 		best_max_diff = (0, None, None)
 		for name, clf in zip(names, classifiers):
-			clf.fit(X_train, y_train)
-			y_predicted = clf.predict(X_test)
-			score = accuracy_score(y_predicted, y_test) 
+			clf.fit(X_train, y_train)		
+			y_predicted = clf.predict_proba(X_test)[:,1] 	
+			y_predicted_binary = to_binary(y_predicted)
+
+			score = accuracy_score(y_predicted_binary, y_test) 
 		
-			actual, predictions = y_test, y_predicted
+			actual, predictions = y_test.as_matrix(), y_predicted
 			false_positive_rate, true_positive_rate, thresholds = roc_curve(actual, predictions)
 			roc_auc = auc(false_positive_rate, true_positive_rate)
-		
-			diffs = true_positive_rate - false_positive_rate
+			
+			diffs = (true_positive_rate - false_positive_rate)
 		
 			max_diff_index = diffs.argmax() 
 			max_diff_value = diffs[max_diff_index]
