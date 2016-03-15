@@ -32,7 +32,12 @@ def binningData(x, max_depth=5, min_samples_leaf=5):
 	return with_edges
 
 def reverse_logistic(x):
-	return -math.log(1.0/x-1.0)/alpha
+	fixed = x
+	if x==0:
+		fixed = 0.001
+	if x==1:
+		fixed = 0.999
+	return -math.log(1.0/fixed-1.0)/alpha
 
 def get_bin_index(value, arr): #FIXME: optimize
 	for i in range(len(arr)-1):
@@ -81,7 +86,7 @@ def get_bins(X_train, y_train):
 def predict(X_test_row, bins):
 	indices = get_bin_indices(X_test_row, bins['tresholds'])
 	p = bins['values'][indices]
-	return p
+	return reverse_logistic(p)
 	
 result_prediction = np.zeros(len(X_test_all))
 
@@ -92,7 +97,7 @@ for params in ensemble:
 	y_predicted = np.apply_along_axis(predict, 1, X_test, bins)
 	result_prediction += y_predicted
 	
-result_prediction = to_binary(result_prediction, len(ensemble)/2.0)
+result_prediction = to_binary(result_prediction, 0)
 
 with open(sys.argv[3], "w") as f:
 	scores = get_scores(result_prediction, y_test)
