@@ -9,14 +9,14 @@ from common import *
 classifiers_dict = dict(zip(names, classifiers))
 with open(sys.argv[2]) as f:
 	lines = filter(lambda l: len(l) and not l.startswith("#"), map(lambda l: l.strip('\n'), f.read().split("\n")))
-	ensemble_classifiers = [(param1, param2, float(threshold), classifiers_dict[name]) for param1, param2, threshold, name in map(lambda l: l.split(' ', 3), lines)]	
+	ensemble_classifiers = [(params.split(' '), float(threshold), classifiers_dict[name]) for params, threshold, name in map(lambda l: l.split('\t'), lines)]	
 
 X_train_all, X_test_all, y_train, y_test = train_test_split(ds, y, test_size=.4)
 result_prediction = np.zeros(len(X_test_all))
 
-for param1, param2, threshold, classifier in ensemble_classifiers:
-	X_train = X_train_all[[param1, param2]]
-	X_test = X_test_all[[param1, param2]]
+for params, threshold, classifier in ensemble_classifiers:
+	X_train = X_train_all[params]
+	X_test = X_test_all[params]
 	classifier.fit(X_train, y_train)
 	y_predicted = classifier.predict_proba(X_test)[:,1] 
 	y_predicted_binary = to_binary(y_predicted, threshold)
