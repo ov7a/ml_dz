@@ -74,8 +74,12 @@ for part in range(0, len(X_test_all), step):
 	all_scores.append(scores)
 
 xes = range(0, len(X_test_all), step)
-plt.plot(xes, map(lambda x: x[-1], all_scores), label = "F1_score")
+f1_score = map(lambda x: x[-1], all_scores)
+plt.plot(xes, f1_score, label = "F1_score")
 plt.grid(True)
+z = np.polyfit(xes, f1_score, 10)
+p = np.poly1d(z)
+plt.plot(xes,p(xes), label ="trend")
 plt.legend(loc='lower left', shadow=True)
 plt.show()	
 for i in range(len(ensemble_classifiers)):
