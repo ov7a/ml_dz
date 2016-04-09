@@ -36,7 +36,14 @@ else:
 	print "unknown function"
 	exit(0)	
 
-X_train_all, X_test_all, y_train, y_test = train_test_split(ds, y, test_size=.4)
+start_sample = 100
+#X_train_all, X_test_all, y_train, y_test = train_test_split(ds, y, test_size=.4)
+X_train_all = ds[:start_sample]
+X_test_all = ds[start_sample:]
+y_train =y[:start_sample]
+y_test = y[start_sample:]
+
+
 for params, threshold, classifier, weight in ensemble_classifiers:
 	X_train = X_train_all[params]
 	classifier.fit(X_train, y_train)
