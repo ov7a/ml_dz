@@ -18,10 +18,16 @@ import pandas
 import sys
 import itertools
 
-names = ["Nearest Neighbors", "Naive Bayes", "Linear Discriminant Analysis",
+names = ["Nearest Neighbors", "Linear SVM", "RBF SVM", "Decision Tree",
+		 "Random Forest", "AdaBoost", "Naive Bayes", "Linear Discriminant Analysis",
 		 "Quadratic Discriminant Analysis"]
 classifiers = [
 	KNeighborsClassifier(3),
+	SVC(kernel="linear", C=0.025, probability = True),
+	SVC(gamma=2, C=1, probability = True),
+	DecisionTreeClassifier(max_depth=5),
+	RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
+	AdaBoostClassifier(),
 	GaussianNB(),
 	LinearDiscriminantAnalysis(),
 	QuadraticDiscriminantAnalysis()
@@ -55,10 +61,10 @@ data_names = [
 	"Duration2" ## same as Duration
 ]
 
-ds = pandas.read_csv(sys.argv[1], '\t', header=None, names = data_names, keep_default_na = False, na_values=[]).query("Label != '0'")
-y = ds['Label'].apply(lambda x: 1 if float(x)<0 else 0)
-#ds = pandas.read_csv(sys.argv[1], ';').query("CLASS != 'U'")
-#y = ds['CLASS'].apply(lambda x: 0 if x=='G' else 1)
+#ds = pandas.read_csv(sys.argv[1], '\t', header=None, names = data_names, keep_default_na = False, na_values=[]).query("Label != '0'")
+#y = ds['Label'].apply(lambda x: 1 if float(x)<0 else 0)
+ds = pandas.read_csv(sys.argv[1], ';').query("CLASS != 'U'")
+y = ds['CLASS'].apply(lambda x: 0 if x=='G' else 1)
 
 to_binary = np.vectorize(lambda x,y: 1.0 if float(x)>=y else 0.0)
 

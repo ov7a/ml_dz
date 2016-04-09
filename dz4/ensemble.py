@@ -1,5 +1,11 @@
 import sys
 
+diff_score = 0.1
+diff_w = 0.05
+diff_t = 0.05
+start_sample = 1000
+max_weight = 2.0
+
 if len(sys.argv) != 5:
 	print "usage %s infile ensemble_config step fix_function" % sys.argv[0]
 	exit(1)
@@ -9,24 +15,23 @@ from common import *
 ensemble_classifiers = get_config(sys.argv[2])
 step = int(sys.argv[3])
 
-
 def fix_weights(ensemble_classifiers, individual_scores, scores):
 	for ec, score in zip(ensemble_classifiers, individual_scores):
 		diff = score[-1] - scores[-1]
-		if (abs(diff) > 0.1):
-			if (diff > 0):
-				ec[-1] += 0.1
-			elif ec[-1] >= 0.1:
-				ec[-1] -= 0.1
+		if (abs(diff) > diff_score):
+			if diff > 0 and ec[-1] < max_weight - diff_w:
+				ec[-1] += diff_w
+			elif ec[-1] >= diff_w:
+				ec[-1] -= diff_w
 
 def fix_thresholds(ensemble_classifiers, individual_scores, scores):
 	for ec, score in zip(ensemble_classifiers, individual_scores):
 		pdiff = score[0] - scores[0]
 		rdiff = score[1] - scores[1]
-		if pdiff < -0.05 and abs(pdiff) > abs(rdiff):
-			ec[1] += 0.05
-		elif rdiff < -0.05 and abs(pdiff) < abs(rdiff):
-			ec[1] -= 0.05
+		if pdiff < -diff_score and abs(pdiff) > abs(rdiff) and ec[1] < 1.0 - diff_t:
+			ec[1] += diff_t
+		elif rdiff < -diff_score and abs(pdiff) < abs(rdiff) and ec[1] > diff_t:
+			ec[1] -= diff_t
 			
 if sys.argv[4] == "weights":
 	fix_ensemble = fix_weights					
@@ -36,7 +41,7 @@ else:
 	print "unknown function"
 	exit(0)	
 
-start_sample = 100
+
 #X_train_all, X_test_all, y_train, y_test = train_test_split(ds, y, test_size=.4)
 X_train_all = ds[:start_sample]
 X_test_all = ds[start_sample:]
@@ -66,7 +71,7 @@ for part in range(0, len(X_test_all), step):
 		result_prediction += y_predicted_binary*weight
 		weights_sum += weight
 	
-	result_prediction = to_binary(result_prediction, weights_sum/2.0)
+	result_prediction = to_binary(result_prediction, len(ensemble_classifiers)/2.0)
 	scores = get_scores(result_prediction, y_test[part:part+size])
 	#print "scores: P = %0.4f, R = %0.4f, F1 = %0.4f" % scores
 	all_weights.append(map(lambda x: x[-1], ensemble_classifiers))
@@ -77,7 +82,7 @@ xes = range(0, len(X_test_all), step)
 f1_score = map(lambda x: x[-1], all_scores)
 plt.plot(xes, f1_score, label = "F1_score")
 plt.grid(True)
-z = np.polyfit(xes, f1_score, 10)
+z = np.polyfit(xes, f1_score, 5)
 p = np.poly1d(z)
 plt.plot(xes,p(xes), label ="trend")
 plt.legend(loc='lower left', shadow=True)
