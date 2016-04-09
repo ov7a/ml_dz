@@ -1,7 +1,7 @@
 import sys
 
-if len(sys.argv) != 4:
-	print "usage %s infile ensemble_config step" % sys.argv[0]
+if len(sys.argv) != 5:
+	print "usage %s infile ensemble_config step fix_function" % sys.argv[0]
 	exit(1)
 
 from common import *
@@ -12,12 +12,29 @@ step = int(sys.argv[3])
 
 def fix_weights(ensemble_classifiers, individual_scores, scores):
 	for ec, score in zip(ensemble_classifiers, individual_scores):
-		diff = score[1] - scores[1]
+		diff = score[-1] - scores[-1]
 		if (abs(diff) > 0.1):
 			if (diff > 0):
 				ec[-1] += 0.1
 			elif ec[-1] >= 0.1:
-				ec[-1] -= 0.1	
+				ec[-1] -= 0.1
+
+def fix_thresholds(ensemble_classifiers, individual_scores, scores):
+	for ec, score in zip(ensemble_classifiers, individual_scores):
+		pdiff = score[0] - scores[0]
+		rdiff = score[1] - scores[1]
+		if pdiff < -0.05 and abs(pdiff) > abs(rdiff):
+			ec[1] += 0.05
+		elif rdiff < -0.05 and abs(pdiff) < abs(rdiff):
+			ec[1] -= 0.05
+			
+if sys.argv[4] == "weights":
+	fix_ensemble = fix_weights					
+elif sys.argv[4] == "thresholds":	
+	fix_ensemble = fix_thresholds
+else:
+	print "unknown function"
+	exit(0)	
 
 X_train_all, X_test_all, y_train, y_test = train_test_split(ds, y, test_size=.4)
 for params, threshold, classifier, weight in ensemble_classifiers:
