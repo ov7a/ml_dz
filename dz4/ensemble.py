@@ -73,12 +73,13 @@ for part in range(0, len(X_test_all), step):
 	fix_weights(ensemble_classifiers, individual_scores, scores)	
 	all_scores.append(scores)
 
-plt.plot(range(0, len(X_test_all), step), map(lambda x: x[0], all_scores), label = "F1_score")
+xes = range(0, len(X_test_all), step)
+plt.plot(xes, map(lambda x: x[-1], all_scores), label = "F1_score")
 plt.grid(True)
 plt.legend(loc='lower left', shadow=True)
 plt.show()	
 for i in range(len(ensemble_classifiers)):
-	plt.plot(range(0, len(X_test_all), step), map(lambda x: x[i], all_weights), label = "weight of " + str(i))
+	plt.plot(xes, map(lambda x: x[i], all_weights), label = "weight of " + str(i))
 plt.grid(True)
 plt.legend(loc='lower left', shadow=True)
 plt.show()	
